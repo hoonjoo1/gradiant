@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="project5.cost.CostDao">
+	<!-- 총 게시물 조회 -->
+	<select id="totCnt" resultType="int" parameterType="costSch">
+		SELECT COUNT(*)
+		FROM (
+		SELECT ROW_NUMBER() OVER (ORDER BY co.COSTKEY  desc ) AS cnt, co.COSTKEY costkey, p.NAME prjname, TO_CHAR(p.STARTDATE,'YYYY-MM-DD')STARTDATE  ,TO_CHAR(p.LASTDATE, 'YYYY-MM-DD') LASTDATE ,
+		cl.NAME company , p.MANAGER pm, co.COSTASSIGN costassign , p.PROJECTKEY prjkey
+		FROM PROJECT p , CLIENT cl , COST co 
+		WHERE co.PROJECTKEY = p.PROJECTKEY 
+		AND p.CLIENTKEY = cl.CLIENTKEY
+		order by cnt asc )
+		where 1=1
+		<if test = "sch!=null and sch!=''">
+		AND prjname LIKE '%'||#{sch}||'%'
+		</if>
+	</select>
+	<!-- 게시글 검색 -->
+	<select id="schCostList" parameterType="costSch" resultType="costList">
+	SELECT*
+		FROM (
+		SELECT ROW_NUMBER() OVER (ORDER BY co.COSTKEY  desc ) AS cnt, co.COSTKEY costkey, p.NAME prjname, TO_CHAR(p.STARTDATE,'YYYY-MM-DD')STARTDATE  ,TO_CHAR(p.LASTDATE, 'YYYY-MM-DD') LASTDATE ,
+		cl.NAME company , p.MANAGER pm, co.COSTASSIGN costassign , p.PROJECTKEY prjkey
+		FROM PROJECT p , CLIENT cl , COST co 
+		WHERE co.PROJECTKEY = p.PROJECTKEY 
+		AND p.CLIENTKEY = cl.CLIENTKEY
+		order by cnt asc )
+	where cnt BETWEEN #{start} AND #{end}*999
+	AND prjname LIKE '%'||#{sch}||'%'
+	order by cnt
+	</select>
+	<!-- 게시글 목록 -->
+ 	<select id="getCostList" resultType="costList" parameterType="costSch">
+ 		SELECT*
+		FROM (
+			SELECT ROW_NUMBER() OVER (ORDER BY co.COSTKEY  desc ) AS cnt, co.COSTKEY costkey, p.NAME prjname, TO_CHAR(p.STARTDATE,'YYYY-MM-DD')STARTDATE  ,TO_CHAR(p.LASTDATE, 'YYYY-MM-DD') LASTDATE ,
+			cl.NAME company , p.MANAGER pm, co.COSTASSIGN costassign , p.PROJECTKEY prjkey
+			FROM PROJECT p , CLIENT cl , COST co 
+			WHERE co.PROJECTKEY = p.PROJECTKEY 
+			AND p.CLIENTKEY = cl.CLIENTKEY
+			order by cnt asc )
+		where cnt BETWEEN #{start} AND #{end}
+		order by cnt
+ 	</select>
+ 	<!-- 프로젝트 목록 -->
+ 	<select id="getPrjList" resultType="costList">
+ 		SELECT PROJECTKEY prjkey , name prjname 
+		FROM PROJECT
+		WHERE NOT PROJECTKEY in (SELECT c.PROJECTKEY
+		FROM cost c, PROJECT p 
+		WHERE c.PROJECTKEY = p.PROJECTKEY)
+		ORDER BY prjkey asc
+ 	</select>
+ 	<!-- 예산 구분 목록 -->
+ 	<select id="getCostSort" resultType="costList">
+ 		SELECT COSTSORTKEY cskey, CONTENT cscontent
+		FROM COSTSORT
+ 	</select>
+ 	<!-- 프로젝트 에산 금액 -->
+	<select id="getPrjCost" resultType="int" parameterType="int">
+		SELECT TAKE 
+		FROM PROJECT
+		WHERE PROJECTKEY = #{prjkey}
+	</select>
+	<!-- 프로젝트 정보 출력 -->
+	<select id="prjDetailInfo" parameterType="int" resultType="costDetailInfo">
+		SELECT p.NAME, p.MANAGER , cl.NAME company  , TO_CHAR(STARTDATE,'YYYY-MM-DD') AS startdateS,
+		TO_CHAR(LASTDATE,'YYYY-MM-DD') AS LASTDATES,p.TAKE TAKE , c.COSTASSIGN costassign , p.PROJECTKEY AS prjkey
+		FROM PROJECT p ,CLIENT cl, COST c 
+		WHERE p.CLIENTKEY = cl.CLIENTKEY 
+		AND p.PROJECTKEY = c.PROJECTKEY 
+		AND p.PROJECTKEY = #{prjkey}
+	</select>
+	<!-- 프로젝트 지출 리스트 -->
+	<select id="costDetailList" parameterType="int" resultType="costDetailInfo">
+		SELECT cs.CONTENT csname , cd.COSTCONTENT content , cd.COSTNOTE costnote ,
+				cd.COSTEX costex, cd.coindex
+		FROM COSTDETAIL cd, PROJECT p , COSTSORT cs
+		WHERE cd.NO = p.PROJECTKEY 
+		AND cd.COSTSORTKEY = cs.COSTSORTKEY 
+		AND p.PROJECTKEY = #{prjkey}
+	</select>
+	<!-- 프로젝트 지출 급액 -->
+	<select id="amountPay" resultType="int" parameterType="int">
+		SELECT sum(COSTEX) as amountpay
+		FROM COSTDETAIL
+		GROUP BY NO
+		HAVING NO = #{prjkey}
+	</select>
+	<!-- 예산 세부항목 인덱스 최대값 -->
+	<select id="getMaxIndex" resultType="int" parameterType="int">
+		SELECT MAX(COINDEX) as maxindex  
+		FROM COSTDETAIL
+		WHERE "NO" = #{prjkey}
+	</select>
+	<!-- 프로젝트 예산 배정 -->
+	<insert id="insPrjCost" parameterType="java.util.List">
+			<foreach collection="list" item="item" separator=" " open="INSERT ALL" close="SELECT * FROM SYS.DUAL">
+				INTO COSTDETAIL(
+					 NO
+					,COSTCONTENT
+					,COSTNOTE
+					,COSTEX
+					,COSTSORTKEY
+					,COINDEX
+				) VALUES(			
+					#{item.no},
+					#{item.costcontent},
+					#{item.costnote},
+					#{item.costex},
+					#{item.cskey},
+					#{item.coindex}
+					)
+			</foreach>	
+	</insert>
+	<!-- 프로젝트 예산 리스트 등록 -->
+	<insert id="insCostList" parameterType="costList">
+		INSERT INTO COST VALUES(
+			(SELECT NVL(MAX(COSTKEY)+1,1) FROM COST),
+			#{prjkey},
+			'미승인',
+			#{prjkey}
+		)
+	</insert>
+	<!-- 승인 처리 -->
+	<update id="costConfirm" parameterType="int">
+		UPDATE cost  SET
+		COSTASSIGN = '승인'
+		WHERE PROJECTKEY = #{prjkey}
+	</update>
+	<!-- 프로젝트 예산 수정 -->
+	<update id="uptPrjCost" parameterType="java.util.List">
+			BEGIN
+			<foreach collection="list" item="item" separator=" ">
+				MERGE INTO COSTDETAIL CO
+				USING DUAL
+					ON(
+					CO.COINDEX = #{item.coindex} AND
+					CO."NO" = #{prjkey}
+					)
+				WHEN MATCHED THEN 
+					UPDATE SET 
+					COSTCONTENT = #{item.costcontent},
+					COSTNOTE = #{item.costnote},
+					COSTEX = #{item.costex},
+					COSTSORTKEY = #{item.cskey}
+				WHEN NOT MATCHED THEN
+					INSERT (NO, COSTCONTENT, COSTNOTE, COSTEX, COSTSORTKEY, COINDEX)
+					VALUES (#{prjkey},#{item.costcontent},#{item.costnote},#{item.costex},#{item.cskey},#{item.coindex});
+			</foreach>
+			END;
+	</update>
+	<!-- 예산 삭제 처리 -->
+	<delete id="delCost" parameterType="int">
+		DELETE FROM cost
+		WHERE PROJECTKEY = #{prjkey}
+	</delete>
+	
+	<delete id="delCostDetail" parameterType="int">
+		DELETE FROM COSTDETAIL
+		WHERE NO = #{prjkey}
+	</delete>
+	
+	<!-- 예산 수정화면 디테일 삭제 -->
+	<delete id="delCostList" parameterType="costDetailInfo">
+		DELETE FROM COSTDETAIL
+		WHERE NO = #{prjkey}
+		AND COINDEX = #{coindex}
+	</delete>
+	
+</mapper>

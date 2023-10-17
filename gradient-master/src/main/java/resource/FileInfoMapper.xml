@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+	
+<mapper namespace="project5.fileInfo.FileInfoDao">
+	<select id="getList" resultType="project5.fileInfo.FileInfoVO">
+		select * from fileInfo
+	</select>
+
+	<select id="findbyfno" resultType="project5.fileInfo.FileInfoVO">
+		select * from fileInfo
+		where fno=#{fno}
+	</select>
+
+	<insert id="insert" parameterType="project5.fileInfo.FileInfoVO">
+		insert into fileInfo values
+		(seq_fileInfo.nextval, #{pathinfo}, #{fname}, sysdate, sysdate, #{etc})
+	</insert>
+
+
+	<!--  아웃풋 저장할 때-->
+	<insert id="insert2" parameterType="project5.fileInfo.FileInfoVO">
+		insert into fileInfo values
+		(seq_output.currval, #{pathinfo}, #{fname}, sysdate, sysdate, #{etc})
+	</insert>
+
+	<!--  프로젝트 저장할 때-->
+	<insert id="insert3" parameterType="project5.fileInfo.FileInfoVO">
+		insert into fileInfo values
+		(seq_project.currval, #{pathinfo}, #{fname}, sysdate, sysdate, #{etc})
+	</insert>
+
+	<!--  프로젝트 저장할 때-->
+	<insert id="insert4" parameterType="project5.fileInfo.FileInfoVO">
+		insert into fileInfo values
+		(seq_vacation.currval, #{pathinfo}, #{fname}, sysdate, sysdate, #{etc})
+	</insert>
+
+
+	
+	
+	<select id="getFileInfoNames" parameterType="int" resultType="string">
+		select fname from fileInfo where fno = #{fno}
+	</select>	
+	
+	
+	
+	<insert id="insertCalendarFile" parameterType="project5.fileInfo.FileInfoVO">
+		insert into fileInfo values
+		(cal_seq.currval, #{pathinfo}, #{fname}, sysdate, sysdate, #{etc})
+	</insert>
+	
+	
+	
+	
+
+	<insert id="update" parameterType="project5.fileInfo.FileInfoVO">
+		update fileInfo 
+		set
+		pathinfo = #{pathinfo},
+		fname=#{fname},
+		etc=#{etc}
+		where fno=#{fno}
+	</insert>
+	
+	
+	
+	
+	
+	
+	
+</mapper>

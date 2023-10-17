@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<typeAlias alias="calendar" type="project5.fullCalendar.Calendar" />
+		<typeAlias alias="risk" type="project5.risk.RiskVO" />
+		<typeAlias alias="riskSch" type="project5.risk.RiskSch" />
+		<typeAlias alias="minutes" type="project5.communication.minutesVO" />
+		<typeAlias alias="minutesSch" type="project5.communication.minutesSch" />
+		<typeAlias alias="contract" type="project5.contract.ContractVO" />
+		<typeAlias alias="contractSch" type="project5.contract.ContractSch" />
+		<typeAlias alias="rcomm" type="project5.risk.Riskcomm" />
+		<typeAlias alias="insrcomm" type="project5.risk.InsRiskcomm" />
+		<typeAlias alias="costList" type="project5.cost.CostList" />
+		<typeAlias alias="costDetail" type="project5.cost.CostDetail" />
+		<typeAlias alias="costDetailInfo" type="project5.cost.CostDetailInfo" />
+		<typeAlias alias="costSch" type="project5.cost.CostSch" />
+		<typeAlias alias="team" type="project5.team.TeamVo"/>
+		<typeAlias alias="TeamSch" type="project5.team.TeamSch"/>
+	</typeAliases>
+	<mappers>
+		<mapper resource="resource/DeptMapper.xml" />
+		<mapper resource="resource/MemberMapper.xml" />
+		<mapper resource="resource/Member2Mapper.xml" />
+		<mapper resource="resource/CalendarMapper.xml" />
+		<mapper resource="resource/KanbanMapper.xml" />
+		<mapper resource="resource/GanttMapper.xml" />
+		<mapper resource="resource/ProjectHomeMapper.xml" />
+		<mapper resource="resource/NoticeMapper.xml" />
+		<mapper resource="resource/NoticeReplyMapper.xml" />
+		<mapper resource="resource/FileInfoMapper.xml" />
+		<mapper resource="resource/RiskMapper.xml" />
+		<mapper resource="resource/NoticeAttachMapper.xml" />
+		<mapper resource="resource/CommunicationMapper.xml" />
+		<mapper resource="resource/CostMapper.xml" />
+		<mapper resource="resource/TeamMapper.xml"/>
+		<mapper resource="resource/QualityMapper.xml"/>
+		<mapper resource="resource/ProcurementMapper.xml"/>
+		<mapper resource="resource/Member_Project_Mapper.xml"/>
+		<mapper resource="resource/ProjectMapper.xml"/>
+		<mapper resource="resource/OutputMapper.xml"/>
+		<mapper resource="resource/WorkSortMapper.xml"/>
+		<mapper resource="resource/DepartmentMapper.xml"/>
+		<mapper resource="resource/VoteMapper.xml"/>
+		<mapper resource="resource/MemoMapper.xml"/>
+		<mapper resource="resource/DashBoardMapper.xml"/>
+		<mapper resource="resource/CustoChatMapper.xml"/>
+		<mapper resource="resource/ChatBotMapper.xml"/>
+		<mapper resource="resource/VacationMapper.xml"/>
+		<mapper resource="resource/AttendanceMapper.xml"/>
+		<mapper resource="resource/BidMapper.xml"/>
+		<mapper resource="resource/ProcuSituationMapper.xml"/>
+		<mapper resource="resource/ContractMapper.xml"/>
+		<mapper resource="resource/MyWorkMapper.xml"/>
+		<mapper resource="resource/FavoriteMapper.xml"/>
+		<mapper resource="resource/ChattingMapper.xml"/>
+		<mapper resource="resource/MainMapper.xml"/>
+	</mappers>
+</configuration>

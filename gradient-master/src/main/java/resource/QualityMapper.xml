@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="project5.quality.QualityDao">
+
+
+	<select id="getList" resultType="project5.quality.QualityVO"
+		parameterType="project5.quality.QualitySch">
+		select *
+		from (
+		select rownum cnt, b.*
+		from quality b
+		where 1=1
+		<if test="title!=null and title!=''">
+			and title like '%'||#{title}||'%'
+		</if>
+		) 
+		where cnt between #{start} and #{end} 
+		ORDER BY qualitykey
+	</select>
+
+
+	<!--  전체 개수 구하는 함수 -->
+	<select id="totCnt" resultType="int"
+		parameterType="project5.quality.QualitySch">
+		select count(*)
+		from quality
+		where 1=1
+		<if test="title!=null and title!=''">
+			and title like '%'||#{title}||'%'
+		</if>
+	</select>
+
+	<select id="get" resultType="project5.quality.QualityVO"
+		parameterType="int">
+		select * from quality where qualitykey = #{qualitykey}
+	</select>
+
+
+
+	<insert id="insert" parameterType="project5.quality.QualityVO">
+		insert into quality
+		values(seq_quality.nextval, 30001, #{memberkey}, sysdate, #{title},
+		#{contents})
+	</insert>
+
+	<select id="update" parameterType="project5.quality.QualityVO">
+		update quality
+		set
+		title=#{title},
+		contents=#{contents}
+		where qualitykey=#{qualitykey}
+	</select>
+
+	<insert id="delete" parameterType="int">
+		delete from
+		quality
+		where
+		qualitykey = #{qualitykey}
+	</insert>
+	
+	<select id="current" resultType="int">
+		SELECT seq_quality.currval FROM
+		dual
+	</select>
+<!-- 품질 평가 -->
+	<!-- 프로젝트 목록 -->
+	<select id="prjlist" resultType="project5.quality.QualityVO">
+		SELECT PROJECTKEY prjkey, name prjname 
+		FROM PROJECT
+		WHERE QUALITY = '불합격'
+	</select>
+	<!-- 품질 평가 항목 -->
+	<select id="evallist" resultType="project5.quality.QualityVO">
+		SELECT EVALITEMKEY evalkey, CONTENT evalcontent
+		FROM EVALITEM
+	</select>
+	<!-- 품질 합격 프로젝트 목록 -->
+	<select id="certiprjlist" resultType="project5.quality.QualityVO">
+		SELECT PROJECTKEY prjkey, name prjname
+		FROM PROJECT
+		WHERE QUALITY = '합격'
+	</select>
+	
+	<!-- 품질 평가 항목 수정 -->
+	<update id="upteval" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" separator=";" open="DECLARE BEGIN" close="; END;">
+			UPDATE EVALITEM 
+			SET CONTENT = #{item.evalcontent}
+			WHERE EVALITEMKEY = #{item.evalkey}
+		</foreach>
+	</update>
+	<!-- 품질 평가 합격 -->
+	<update id="qualitypass" parameterType="project5.quality.QualityVO">
+		UPDATE PROJECT 
+		SET QUALITY = '합격'
+		WHERE PROJECTKEY = #{prjkey}
+	</update>
+
+
+</mapper>

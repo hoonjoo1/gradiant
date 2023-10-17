@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="project5.gantt.GanttDao">
+
+	<select id="list" resultType="project5.gantt.GanttVO">
+		SELECT id, text,
+		to_char(start_date, 'DD-MM-YYYY') start_date, duration,
+		projectkey,
+		memberkey
+		FROM gantt
+		where projectkey=#{projectkey}
+		order by start_date
+	</select>
+
+
+
+
+	<select id="currentGantt" resultType="project5.gantt.GanttVO">
+		SELECT * FROM gantt WHERE TO_CHAR(SYSDATE, 'YYYY/MM/dd')  <![CDATA[<=]]>
+		TO_CHAR(start_date+duration, 'YYYY/MM/dd')
+		AND TO_CHAR(SYSDATE,
+		'YYYY/MM/dd')  <![CDATA[>=]]>
+		TO_CHAR(start_date, 'YYYY/MM/dd')
+	</select>
+
+	<select id="currentGanttbymkey"
+		resultType="project5.gantt.GanttVO" parameterType="int">
+		SELECT * FROM gantt WHERE TO_CHAR(SYSDATE, 'YYYY/MM/dd')  <![CDATA[<=]]>
+		TO_CHAR(start_date+duration, 'YYYY/MM/dd')
+		AND TO_CHAR(SYSDATE,
+		'YYYY/MM/dd')  <![CDATA[>=]]>
+		TO_CHAR(start_date, 'YYYY/MM/dd') and memberkey=#{memberkey}
+	</select>
+
+
+	<select id="individualMemberGanttList"
+		resultType="project5.gantt.GanttVO" parameterType="int">
+		select * from
+		gantt
+		where memberkey = #{memberkey}
+	</select>
+
+
+	<select id="individualProjectGanttList"
+		resultType="project5.gantt.GanttVO" parameterType="int">
+		select * from
+		gantt
+		where projectkey = #{projectkey}
+	</select>
+
+
+
+
+
+	<insert id="insert" parameterType="project5.gantt.GanttVO">
+		insert into gantt
+		values
+		(seq_gantt.nextval, #{text}, #{start_date}, #{duration},
+		#{projectkey}, #{memberkey})
+	</insert>
+
+	<delete id="delete" parameterType="int">
+		delete from
+		gantt
+		where id=#{id}
+	</delete>
+
+	<update id="update" parameterType="project5.gantt.GanttVO">
+		update gantt
+		set
+		text=#{text},
+		start_date =#{start_date},
+		duration = #{duration}
+		where id=#{id}
+	</update>
+
+	<update id="update2" parameterType="project5.gantt.GanttVO">
+		update gantt
+		set
+		text=#{text}
+		where id=#{id}
+	</update>
+
+
+
+	<!-- 전체 데이터 수 가져오기 -->
+	<select id="totCnt"
+		parameterType="project5.fullCalendar.CalendarSch" resultType="int">
+		SELECT
+		count(*) FROM gantt WHERE projectkey IN (
+		SELECT projectkey FROM
+		member_project WHERE memberkey=#{memberkey})
+	</select>
+
+
+	<!-- 리스트를 불러오기 -->
+	<select id="listWithPaging"
+		resultType="project5.gantt.GanttVO"
+		parameterType="project5.gantt.GanttSch">
+		select *
+		from (
+		select rownum cnt,g.*
+		FROM
+		gantt g
+		where
+		projectkey IN (
+		SELECT projectkey FROM member_project WHERE memberkey=#{memberkey})
+		)
+		where cnt between
+		#{start} and #{end}
+		order by id
+	</select>
+
+
+	<select id="get" parameterType="int" resultType="project5.gantt.GanttVO">
+		select * from gantt where id=#{id}
+	</select>
+
+
+</mapper>
+

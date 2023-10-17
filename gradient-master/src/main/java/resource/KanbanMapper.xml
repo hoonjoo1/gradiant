@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="project5.kanban.KanbanDao">
+
+	<select id="list" resultType="project5.kanban.KanbanVO">
+		select id, status, text, tags,
+		content, color, writedate, duedate, projectkey, deptno, memberkey
+		resourceId
+		from kanban
+		where projectkey=#{projectkey}
+	</select>
+
+
+
+
+	<select id="listWork" resultType="project5.kanban.KanbanVO">
+		select * from
+		kanban where
+		status='work'
+	</select>
+
+	<select id="individualMemberList"
+		resultType="project5.kanban.KanbanVO" parameterType="int">
+		select * from
+		kanban where memberkey = #{memberkey}
+	</select>
+
+	<select id="individualProjectList"
+		resultType="project5.kanban.KanbanVO" parameterType="int">
+		select * from
+		kanban where projectkey = #{projectkey}
+	</select>
+
+
+	<insert id="insert" parameterType="project5.kanban.KanbanVO">
+		insert into kanban
+		values
+		(seq_kanban.nextval, #{status}, #{text}, #{tags}, #{content},#{color},
+		sysdate, sysdate, #{projectkey}, #{resourceId}, 1)
+	</insert>
+
+	<delete id="delete" parameterType="project5.kanban.KanbanVO">
+		delete from
+		kanban
+		where
+		text=#{text}
+		and content=#{content}
+	</delete>
+
+
+	<update id="update" parameterType="project5.kanban.KanbanVO">
+		update kanban
+		set
+		status=#{status},
+		text =#{text},
+		tags = #{tags}
+		where
+		projectkey=#{projectkey}
+		and content=#{content}
+	</update>
+
+	<update id="update2" parameterType="project5.kanban.KanbanVO">
+		update kanban
+		set
+		status=#{status}
+		where text=#{text}
+		and content=#{content}
+	</update>
+
+
+
+
+
+	<!-- 전체 데이터 수 가져오기 -->
+	<select id="totCnt" parameterType="project5.kanban.KanbanSch"
+		resultType="int">
+		SELECT
+		count(*) FROM kanban WHERE projectkey IN (
+		SELECT
+		projectkey FROM
+		member_project WHERE memberkey=#{memberkey})
+	</select>
+
+
+	<!-- 리스트를 불러오기 -->
+	<select id="listWithPaging"
+		resultType="project5.kanban.KanbanVO"
+		parameterType="project5.kanban.KanbanSch">
+		select *
+		from (
+		select rownum cnt,g.*
+		FROM
+		kanban g
+		where
+		projectkey IN (
+		SELECT projectkey FROM member_project WHERE
+		memberkey=#{memberkey})
+		)
+		where cnt between
+		#{start} and #{end}
+		order by
+		id
+	</select>
+
+
+
+
+
+
+	<select id="get" parameterType="int"
+		resultType="project5.kanban.KanbanVO">
+		select * from kanban where id=#{id}
+	</select>
+
+
+
+
+
+
+
+
+</mapper>
+
